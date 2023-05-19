@@ -1,48 +1,75 @@
 #!/bin/bash
 
-### UNZIPING
+### UNZIPPING
 echo "Running cnefe unzip..."
 
-output_file="/app/output/cnefe.csv"
+output_dir="/app/output"
 tmp_dir="/app/tmp"
-DATA_DIR="/app/data"
+data_dir="/app/data"
 
-# Create temporary directory
+# Create the output directory if it doesn't exist
+mkdir -p "$output_dir"
+
+# Create the temporary directory if it doesn't exist
 mkdir -p "$tmp_dir"
 
 # Find zip files recursively and store paths in an array
-mapfile -d $'\0' zip_files < <(find "$DATA_DIR" -name "*.zip" -type f -print0)
+mapfile -d $'\0' zip_files < <(find "$data_dir" -name "*.zip" -type f -print0)
 
 # Process zip files
 for file in "${zip_files[@]}"; do
   echo "Processing $file"
+  # Create a temporary directory for each zip file
+  temp_dir=$(mktemp -d "$tmp_dir/zip.XXXXXXXXXX")
+
   # Extract zip file and process with gawk
-  unzip -p "$file" | gawk -v FIELDWIDTHS='15 1 20 30 60 8 7 20 10 20 10 20 10 20 10 20 10 20 10 15 15 60 60 2 40 1 30 3 3 8' -v OFS=';' '{ $1=$1; print }' > "$tmp_dir/$(basename "$file").csv"
+  unzip -p "$file" | gawk -v FIELDWIDTHS='15 1 20 30 60 8 7 20 10 20 10 20 10 20 10 20 10 20 10 15 15 60 60 2 40 1 30 3 3 8' -v OFS=';' '{ $1=$1; print }' |
+  awk -v upper_folder="$(basename "$(dirname "$file")")" -F ';' '$20 != "               " {
+    fullAddress = $3 " " $4 " " $5 " " $6 " " $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $14 " " $15 " " $16 " " $17 " " $18 " " $19 " " $22 " " $30
+    gsub(/  +/, " ", fullAddress)
+    print upper_folder ";" $1 ";" $3 " " $4 " " $5 ";" $6 ";" $30 ";" $20 ";" $21 ";" fullAddress " " upper_folder
+  }' |
+  tr -s ' ' > "$temp_dir/$(basename "$file").csv"
+
+  # Move the processed CSV file to the output directory
+  mv "$temp_dir/$(basename "$file").csv" "$output_dir/"
+
 done
 
-# Concatenate all CSV files and save as a single CSV
-cat <(echo "sectorId;sectorSituation;addressType;addressTitle;addressName;addressNumber;addressModifier;element1;value1;element2;value2;element3;value3;element4;value4;element5;value5;element6;value7;lat;lon;locality;blank;specie;identification;indicator;collectiveIdentification;block;face;cep") "$tmp_dir"/*.csv > "$output_file"
 
-### PROCESSING
+# #!/bin/bash
 
-echo "Running prepare-cnefe.sh..."
+# ### UNZIPPING
+# echo "Running cnefe unzip..."
 
-input_file="/app/output/cnefe.csv"
-output_file="/app/output/cnefe_processed.csv"
+# output_dir="/app/output"
+# tmp_dir="/app/tmp"
+# data_dir="/app/data"
 
-# Count the number of lines in the input file
-line_count=$(wc -l < "$input_file")
-current_line=0
+# # Create the output directory if it doesn't exist
+# mkdir -p "$output_dir"
 
-# Read CSV file and generate "fullAddress" column
-awk -v line_count="$line_count" 'BEGIN{FS=OFS=";"} {
-  fullAddress = $3 " " $4 " " $5 " " $6 " " $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $14 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $22
-  gsub(/  +/, " ", fullAddress)
-  print $0, "fullAddress"
-  printf("Processed line: %d/%d\n", ++current_line, line_count) > "/dev/stderr"
-}' "$input_file" > "$output_file"
+# # Create the temporary directory if it doesn't exist
+# mkdir -p "$tmp_dir"
 
-echo "Processing completed. Output file: $output_file"
+# # Find zip files recursively and store paths in an array
+# mapfile -d $'\0' zip_files < <(find "$data_dir" -name "*.zip" -type f -print0)
 
+# # Process zip files
+# for file in "${zip_files[@]}"; do
+#   echo "Processing $file"
+#   # Create a temporary directory for each zip file
+#   temp_dir=$(mktemp -d "$tmp_dir/zip.XXXXXXXXXX")
 
+#   # Extract zip file and process with gawk
+#   unzip -p "$file" | gawk -v FIELDWIDTHS='15 1 20 30 60 8 7 20 10 20 10 20 10 20 10 20 10 20 10 15 15 60 60 2 40 1 30 3 3 8' -v OFS=';' '{ $1=$1; print }' |
+#   awk -v upper_folder="$(basename "$(dirname "$file")")" -F ';' '$20 != "               " {
+#     fullAddress = $3 " " $4 " " $5 " " $6 " " $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $14 " " $15 " " $16 " " $17 " " $18 " " $19 " " $22 " " $30
+#     gsub(/  +/, " ", fullAddress)
+#     print upper_folder ";" $1 ";" $3 " " $4 " " $5 ";" $6 ";" $30 ";" $20 ";" $21 ";" fullAddress " " upper_folder
+#   }' > "$temp_dir/$(basename "$file").csv"
 
+#   # Move the processed CSV file to the output directory
+#   mv "$temp_dir/$(basename "$file").csv" "$output_dir/"
+
+# done
