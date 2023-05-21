@@ -28,7 +28,8 @@ for file in "${zip_files[@]}"; do
     gsub(/ /, "", $2)  # Remove spaces in the $2 column
     fullAddress = $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $10 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $21 " " $22 " " $23 " " $26 " " $34
     gsub(/  +/, " ", fullAddress)
-    print upper_folder ";" $1"00"$2 ";" $7 " " $8 " " $9";" $10";" $34";" $24";" $25";" fullAddress " " upper_folder
+    $2 = sprintf("%05d", $2)  # Append leading zeros to the ID column
+    print upper_folder ";" $1""$2 ";" $7 " " $8 " " $9";" $10";" $34";" $24";" $25";" fullAddress " " upper_folder
   }' |
   tr -s ' ' > "$temp_dir/$(basename "$file").csv"
 
@@ -36,4 +37,3 @@ for file in "${zip_files[@]}"; do
   mv "$temp_dir/$(basename "$file").csv" "$output_dir/"
 
 done
-
