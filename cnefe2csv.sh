@@ -25,13 +25,38 @@ for file in "${zip_files[@]}"; do
   # Extract zip file and process with gawk
   unzip -p "$file" | gawk -v FIELDWIDTHS='2 5 2 2 4 1 20 30 60 8 7 20 10 20 10 20 10 20 10 20 10 20 10 15 15 60 60 2 40 1 30 3 3 8' -v OFS=';' '{ $1=$1; print }' |
   awk -v upper_folder="$(basename "$(dirname "$file")")" -F ';' '$24 != "               " {
-    gsub(/ /, "", $2)  # Remove spaces in the $2 column
-    fullAddress = $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $10 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $21 " " $22 " " $23 " " $26 " " $34
-    gsub(/  +/, " ", fullAddress)
+    gsub(/ /, "", $2)  # Remove spaces in the ID column
+
     $2 = sprintf("%05d", $2)  # Append leading zeros to the ID column
-    print upper_folder ";" $1""$2 ";" $7 " " $8 " " $9";" $10";" $34";" $24";" $25";" fullAddress " " upper_folder
+
+    # Convert latitude from degrees minutes seconds to decimal coordinates
+    lat_deg = int($24)
+    lat_min = int(substr($24, 4, 2))
+    lat_sec = substr($24, 7, 6)
+    lat_dir = substr($24, 15, 1)
+    latitude = lat_deg + lat_min/60 + lat_sec/3600
+    if (index($24, "S") > 0) {
+      latitude *= -1
+    }
+
+    # Convert longitude from degrees minutes seconds to decimal coordinates
+    lon_deg = int($25)
+    lon_min = int(substr($25, 4, 2))
+    lon_sec = substr($25, 7, 6)
+    lon_dir = substr($25, 15, 1)
+    longitude = lon_deg + lon_min/60 + lon_sec/3600
+    if (index($25, "O") > 0) {
+      longitude *= -1
+    }
+
+    fullAddress = $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $10 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $21 " " $22 " " $23 " " latitude " " longitude
+    gsub(/  +/, " ", fullAddress)
+    
+    print upper_folder ";" $1 "00" $2 ";" $7 " " $8 " " $9 ";" $10 ";" $34 ";" latitude ";" longitude ";" fullAddress " " upper_folder
   }' |
   tr -s ' ' > "$temp_dir/$(basename "$file").csv"
+
+
 
   # Move the processed CSV file to the output directory
   mv "$temp_dir/$(basename "$file").csv" "$output_dir/"
