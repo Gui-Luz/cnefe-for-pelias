@@ -49,14 +49,13 @@ for file in "${zip_files[@]}"; do
       longitude *= -1
     }
 
-    fullAddress = $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $10 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $21 " " $22 " " $23
+    fullAddress = $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $10 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $21 " " $22 " " $34 " " $23 " " " " upper_folder
     gsub(/  +/, " ", fullAddress)
-    
-    print upper_folder ";" $1 "00" $2 ";" $7 " " $8 " " $9 ";" $10 ";" $34 ";" latitude ";" longitude ";" fullAddress " " upper_folder
+
+    print upper_folder ";" $1$2 ";" $7 " " $8 " " $9 ";" $10 ";" $34 ";" latitude ";" longitude ";" fullAddress
   }' |
+
   tr -s ' ' > "$temp_dir/$(basename "$file").csv"
-
-
 
   # Move the processed CSV file to the output directory
   mv "$temp_dir/$(basename "$file").csv" "$output_dir/"
