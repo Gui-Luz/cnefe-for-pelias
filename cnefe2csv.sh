@@ -1,12 +1,15 @@
 #!/bin/bash
 
 ### UNZIPPING
-echo "Running cnefe unzip..."
+echo "Running cnefe processing..."
+
+#Substituting , for ;
+sed 's/,/;/g' municipios.csv > municipios2.csv
 
 output_dir="/app/output"
 tmp_dir="/app/tmp"
 data_dir="/app/data"
-municipios_csv="/app/municipios.csv"  # Path to the municipios.csv file
+municipios_csv="/app/municipios2.csv"  # Path to the municipios.csv file
 
 # Create the output directory if it doesn't exist
 mkdir -p "$output_dir"
