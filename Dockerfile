@@ -9,6 +9,7 @@ WORKDIR /app
 
 # Copy the script and data directory into the container
 COPY cnefe2csv.sh /app/cnefe2csv.sh
+COPY municipios.csv /app/municipios.csv
 COPY data /app/data
 
 # Make the script executable
