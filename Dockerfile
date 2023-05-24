@@ -8,13 +8,12 @@ RUN apt-get update && apt-get install -y unzip gawk
 WORKDIR /app
 
 # Copy the script and data directory into the container
-COPY cnefe2csv.sh /app/cnefe2csv.sh
+COPY cnefe4pelias.sh /app/cnefe4pelias.sh
 COPY municipios.csv /app/municipios.csv
 COPY data /app/data
 
 # Make the script executable
-RUN chmod +x /app/cnefe2csv.sh
+RUN chmod +x /app/cnefe4pelias.sh
 
 # Run the script when the container starts
-CMD ["/bin/bash", "/app/cnefe2csv.sh"]
-
+CMD ["/bin/bash", "/app/cnefe4pelias.sh"]
