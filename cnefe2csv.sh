@@ -73,7 +73,11 @@ for file in "${zip_files[@]}"; do
       print upper_folder ";" city_name ";" city_id ";" $7 " " $8 " " $9 ";" $10 ";" $34 ";" latitude ";" longitude ";" fullAddress
     }' |
 
-  tr -s ' ' | sed 's/\b\([a-z]\)/\u\1/g' | sed 's/ *; */;/g' > "$temp_dir/$(basename "$file").csv"
+  tr '[:lower:]' '[:upper:]' |  # Convert output to uppercase
+
+  tr -s ' ' | 
+  
+  sed 's/ *; */;/g' > "$temp_dir/$(basename "$file").csv"
 
   # Move the processed CSV file to the output directory
   mv "$temp_dir/$(basename "$file").csv" "$output_dir/"
