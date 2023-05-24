@@ -67,13 +67,13 @@ for file in "${zip_files[@]}"; do
         city_name = "Unknown"  # Set a default value if the city name is not found
       }
 
-      fullAddress = $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $10 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $21 " " $22 " " $34 " " $23 " " city_name " " upper_folder
+      fullAddress = $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $14 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $21 " " $22 " " $23 " " $26 " " $34 " " city_name " " upper_folder
       gsub(/  +/, " ", fullAddress)
 
-      print upper_folder ";" city_name ";" city_id ";" $7 " " $8 " " $9 ";" $10 ";" $34 ";" latitude ";" longitude ";" fullAddress ";"
+      print upper_folder ";" city_name ";" city_id ";" $7 " " $8 " " $9 ";" $10 ";" $34 ";" latitude ";" longitude ";" fullAddress
     }' |
 
-  tr -s ' ' > "$temp_dir/$(basename "$file").csv"
+  tr -s ' ' | sed 's/\b\([a-z]\)/\u\1/g' | sed 's/ *; */;/g' > "$temp_dir/$(basename "$file").csv"
 
   # Move the processed CSV file to the output directory
   mv "$temp_dir/$(basename "$file").csv" "$output_dir/"
