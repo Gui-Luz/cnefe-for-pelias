@@ -3,7 +3,10 @@
 ### UNZIPPING
 echo "Running cnefe processing..."
 
-#Substituting , for ;
+# Get the current timestamp when the script starts
+start_time=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Substituting , for ;
 sed 's/,/;/g' municipios.csv > municipios2.csv
 
 output_dir="/app/output"
@@ -70,16 +73,28 @@ for file in "${zip_files[@]}"; do
       fullAddress = $7 " " $8 " " $9 " " $10 " " $11 " " $12 " " $13 " " $14 " " $15 " " $16 " " $17 " " $18 " " $19 " " $20 " " $21 " " $22 " " $23 " " $26 " " $34 " " city_name " " upper_folder
       gsub(/  +/, " ", fullAddress)
 
-      print upper_folder ";" city_name ";" city_id ";" $7 " " $8 " " $9 ";" $10 ";" $34 ";" latitude ";" longitude ";" fullAddress
+      print "CNEFE" ";" "address" ";" upper_folder ";" city_name ";" city_id ";" $7 " " $8 " " $9 ";" $10 ";" $34 ";" latitude ";" longitude ";" fullAddress
     }' |
-
   tr '[:lower:]' '[:upper:]' |  # Convert output to uppercase
-
-  tr -s ' ' | 
-  
-  sed 's/ *; */;/g' > "$temp_dir/$(basename "$file").csv"
+  tr -s ' ' |
+  sed 's/ *; */;/g' >> "$temp_dir/$(basename "$(dirname "$file")").csv"
 
   # Move the processed CSV file to the output directory
-  mv "$temp_dir/$(basename "$file").csv" "$output_dir/"
-
+  mv "$temp_dir/$(basename "$(dirname "$file")").csv" "$output_dir/"
 done
+
+# Append column names to each file in the output directory
+column_names="source;layer;state;city;id;street;housenumber;postcode;lat;lon;name"
+for file in "$output_dir"/*.csv; do
+  tmp_file=$(mktemp)
+  echo "$column_names" > "$tmp_file"
+  cat "$file" >> "$tmp_file"
+  mv "$tmp_file" "$file"
+done
+
+# Get the current timestamp when the script ends
+end_time=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Print the start and end time
+echo "Script started at: $start_time"
+echo "Script ended at: $end_time"
