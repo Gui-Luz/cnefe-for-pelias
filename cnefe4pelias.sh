@@ -77,10 +77,8 @@ for file in "${zip_files[@]}"; do
     }' |
   tr '[:lower:]' '[:upper:]' |  # Convert output to uppercase
   tr -s ' ' |
-  sed 's/ *; */;/g' >> "$temp_dir/$(basename "$(dirname "$file")").csv"
+  sed 's/ *; */;/g' >> "$output_dir/$(basename "$(dirname "$file")").csv"
 
-  # Move the processed CSV file to the output directory
-  mv "$temp_dir/$(basename "$(dirname "$file")").csv" "$output_dir/"
 done
 
 # Append column names to each file in the output directory
